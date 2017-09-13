@@ -15,24 +15,34 @@ namespace TryGetExeLargeIcon
         [STAThread]
         static void Main(string[] args)
         {
+            //选择文件对话框
             var opfd = new System.Windows.Forms.OpenFileDialog { Filter = "资源文件|*.exe;*.dll" };
             if (opfd.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
             var file = opfd.FileName;
 
+            //指定存放图标的文件夹
+            const string folderToSave = "D:\\temp\\";
+            if (!Directory.Exists(folderToSave)) Directory.CreateDirectory(folderToSave);
+
+            //选中文件中的图标总数
             var iconTotalCount = PrivateExtractIcons(file, 0, 0, 0, null, null, 0, 0);
 
+            //用于接收获取到的图标指针
             IntPtr[] hIconsDefault = new IntPtr[iconTotalCount];
+            //对应的图标id
             int[] idsDefault = new int[iconTotalCount];
+            //成功获取到的图标个数
             var successCount = PrivateExtractIcons(file, 0, 0, 0, hIconsDefault, idsDefault, iconTotalCount, 0);
 
             IntPtr[] hIconsLarge = new IntPtr[iconTotalCount];
             int[] idsLarge = new int[iconTotalCount];
             PrivateExtractIcons(file, 0, 256, 256, hIconsLarge, idsLarge, iconTotalCount, 0);
 
+            //遍历并保存图标
             for (var i = 0; i < successCount; i++)
             {
+                //指针为空，跳过
                 if (hIconsDefault[i] == IntPtr.Zero) continue;
-
 
                 IntPtr hicon, defaultSizeIcon = hIconsDefault[i], largeIcon = hIconsLarge[i];
                 //如果id相同，说明是读取同一个图标文件，取默认大小的
@@ -52,9 +62,10 @@ namespace TryGetExeLargeIcon
                 {
                     using (var myIcon = ico.ToBitmap())
                     {
-                        myIcon.Save("D:\\temp\\" + idsDefault[i].ToString("000") + ".png", ImageFormat.Png);
+                        myIcon.Save(folderToSave + hicon.ToString("000") + ".png", ImageFormat.Png);
                     }
                 }
+                //内存回收
                 DestroyIcon(hicon);
             }
         }
@@ -68,8 +79,8 @@ namespace TryGetExeLargeIcon
         public static extern int PrivateExtractIcons(
             string lpszFile, //file name
             int nIconIndex,  //The zero-based index of the first icon to extract.
-            int cxIcon,      //width
-            int cyIcon,      //height
+            int cxIcon,      //The horizontal icon size wanted.
+            int cyIcon,      //The vertical icon size wanted.
             IntPtr[] phicon, //(out) A pointer to the returned array of icon handles.
             int[] piconid,   //(out) A pointer to a returned resource identifier.
             int nIcons,      //The number of icons to extract from the file. Only valid when *.exe and *.dll
