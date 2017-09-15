@@ -68,30 +68,37 @@ namespace TryGetExeLargeIcon
                 //内存回收
                 DestroyIcon(hicon);
             }
+            Console.WriteLine($"{successCount} icons in \"{opfd.FileName}\" have been extracted to \"{folderToSave}\"");
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
         }
 
 
         //details: https://msdn.microsoft.com/en-us/library/windows/desktop/ms648075(v=vs.85).aspx
-        //Creates an array of handles to icons that are extracted from a specified file.
         //This function extracts from executable (.exe), DLL (.dll), icon (.ico), cursor (.cur), animated cursor (.ani), and bitmap (.bmp) files. 
         //Extractions from Windows 3.x 16-bit executables (.exe or .dll) are also supported.
+        /// <summary>
+        /// Creates an array of handles to icons that are extracted from a specified file.
+        /// </summary>
+        /// <param name="lpszFile">file name</param>
+        /// <param name="nIconIndex">The zero-based index of the first icon to extract.</param>
+        /// <param name="cxIcon">The horizontal icon size wanted.</param>
+        /// <param name="cyIcon">The vertical icon size wanted.</param>
+        /// <param name="phicon">(out) A pointer to the returned array of icon handles.</param>
+        /// <param name="piconid">(out) A pointer to a returned resource identifier.</param>
+        /// <param name="nIcons">The number of icons to extract from the file. Only valid when *.exe and *.dll</param>
+        /// <param name="flags">Specifies flags that control this function.</param>
+        /// <returns>Succecc Count</returns>
         [DllImport("User32.dll")]
-        public static extern int PrivateExtractIcons(
-            string lpszFile, //file name
-            int nIconIndex,  //The zero-based index of the first icon to extract.
-            int cxIcon,      //The horizontal icon size wanted.
-            int cyIcon,      //The vertical icon size wanted.
-            IntPtr[] phicon, //(out) A pointer to the returned array of icon handles.
-            int[] piconid,   //(out) A pointer to a returned resource identifier.
-            int nIcons,      //The number of icons to extract from the file. Only valid when *.exe and *.dll
-            int flags        //Specifies flags that control this function.
-        );
+        public static extern int PrivateExtractIcons(string lpszFile, int nIconIndex, int cxIcon, int cyIcon, IntPtr[] phicon, int[] piconid, int nIcons, int flags);
 
         //details:https://msdn.microsoft.com/en-us/library/windows/desktop/ms648063(v=vs.85).aspx
-        //Destroys an icon and frees any memory the icon occupied.
+        /// <summary>
+        /// Destroys an icon and frees any memory the icon occupied.
+        /// </summary>
+        /// <param name="hIcon">A handle to the icon to be destroyed. The icon must not be in use.</param>
+        /// <returns>Success or not</returns>
         [DllImport("User32.dll")]
-        public static extern bool DestroyIcon(
-            IntPtr hIcon //A handle to the icon to be destroyed. The icon must not be in use.
-        );
+        public static extern bool DestroyIcon(IntPtr hIcon);
     }
 }
